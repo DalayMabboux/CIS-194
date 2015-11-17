@@ -23,14 +23,14 @@ toRevDigits x
 -- Exercise 3 -----------------------------------------
 
 -- Double every second number in a list starting on the left.
-doubleEveryOther :: [Integer] -> [Integer]
-doubleEveryOther l = snd $ foldr (\v (a, xs) -> if a then (False, 2*v:xs)
+doubleEveryOtherAlternate :: [Integer] -> [Integer]
+doubleEveryOtherAlternate l = snd $ foldr (\v (a, xs) -> if a then (False, 2*v:xs)
                                                      else (True, v:xs)) (True, []) l
 
-doubleEveryOther2 :: [Integer] -> [Integer]
-doubleEveryOther2 [] = []
-doubleEveryOther2 [x] = [x]
-doubleEveryOther2 (x:y:xs) = x:(y*2) : doubleEveryOther2 xs
+doubleEveryOther :: [Integer] -> [Integer]
+doubleEveryOther [] = []
+doubleEveryOther [x] = [x]
+doubleEveryOther (x:y:xs) = x:(y*2) : doubleEveryOther xs
 
 -- Exercise 4 -----------------------------------------
 
@@ -45,7 +45,7 @@ sumDigits = foldl (\a d -> a + (sum $ toRevDigits d)) 0
 luhn :: Integer -> Bool
 luhn d = summe `mod` 10 == 0
          where
-           summe = sumDigits . doubleEveryOther2 $ toRevDigits d
+           summe = sumDigits . doubleEveryOther $ toRevDigits d
 
 -- Exercise 6 -----------------------------------------
 
@@ -54,4 +54,5 @@ type Peg = String
 type Move = (Peg, Peg)
 
 hanoi :: Integer -> Peg -> Peg -> Peg -> [Move]
-hanoi = undefined
+hanoi 0 _ _ _ = []
+hanoi n a b c = (hanoi (n - 1) a c b) ++ [(a, b)] ++ (hanoi (n - 1) c b a)
