@@ -52,12 +52,23 @@ isConsistent (Move xs a b) ys = a == a' && b == b'
 -- Exercise 5 -----------------------------------------
 
 filterCodes :: Move -> [Code] -> [Code]
-filterCodes = undefined
+filterCodes x y = filter (isConsistent x) y
 
 -- Exercise 6 -----------------------------------------
 
 allCodes :: Int -> [Code]
-allCodes = undefined
+allCodes 0 = []
+allCodes 1 = iter []
+allCodes x = concatMap iter (allCodes (x - 1))
+
+iter :: Code -> [Code]
+iter c = [ c ++ [n] | n <- colors ]
+
+
+allCodes2 :: Int -> [Code]
+allCodes2 0 = [[]]
+allCodes2 n = [ c : code | c <- colors, code <- allCodes (n - 1) ]
+
 
 -- Exercise 7 -----------------------------------------
 
