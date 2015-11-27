@@ -65,15 +65,17 @@ iter :: Code -> [Code]
 iter c = [ c ++ [n] | n <- colors ]
 
 
-allCodes2 :: Int -> [Code]
-allCodes2 0 = [[]]
-allCodes2 n = [ c : code | c <- colors, code <- allCodes (n - 1) ]
-
-
 -- Exercise 7 -----------------------------------------
 
 solve :: Code -> [Move]
-solve = undefined
+solve x = takeWhileInclusive matchingCode . map (getMove x) . allCodes $ length x
+
+matchingCode :: Move -> Bool
+matchingCode (Move xs a _) = length xs /= a
+
+takeWhileInclusive :: (a -> Bool) -> [a] -> [a]
+takeWhileInclusive _ [] = []
+takeWhileInclusive p (x:xs) = x : if p x then takeWhileInclusive p xs else []
 
 -- Bonus ----------------------------------------------
 
