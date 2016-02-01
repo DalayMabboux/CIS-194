@@ -12,14 +12,13 @@ x = P [1]
 
 -- Exercise 2 ----------------------------------------
 
-instance (Num a, Eq a) => Eq (Poly a) where
-    (P a) == (P b) = r a == r b
-       where r z = dropWhile (==0) z
+-- instance (Num a, Eq a) => Eq (Poly a) where
+--     (P a) == (P b) = r a == r b
+--        where r z = dropWhile (==0) z
  
 -- Exercise 3 -----------------------------------------
-rz ::  Poly a -> [(Int, a)]
-rz (P a) = reverse $ zip [0..] a
-
+-- instance (Num a, Eq a, Show a) => Show (Poly a) where
+--     show (P a) = show a
 instance (Num a, Eq a, Show a) => Show (Poly a) where
    show (P a) = intercalate " + " . s . reverse $ zip [0..] a
      where s :: (Eq a, Show a, Num a) => [(Int, a)] -> [String]
@@ -34,9 +33,15 @@ instance (Num a, Eq a, Show a) => Show (Poly a) where
            sz y = (show y)
 
 -- Exercise 4 -----------------------------------------
+-- postfixZero :: Num a => Int -> [a] -> [a]
+-- postfixZero c l = l ++ replicate c 0
 
 plus :: Num a => Poly a -> Poly a -> Poly a
-plus = undefined
+plus (P a) (P b) = P $ map (\(k,l)->k+l) $ zip (f a b) (f b a)
+  where f m n
+          | length m < length n = postfixZero (length n - length m) m
+          | otherwise = m
+        postfixZero c l = l ++ replicate c 0
 
 -- Exercise 5 -----------------------------------------
 
