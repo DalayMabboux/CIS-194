@@ -29,7 +29,6 @@ instance (Num a, Eq a, Show a) => Show (Poly a) where
              | i == 1 = (sz z ++ "x") : s zs
              | otherwise = (sz z ++ "x^" ++ show i) : s zs
            sz 0 = ""
-           sz (-1) = "-"
            sz y = show y
 
 -- Exercise 4 -----------------------------------------
@@ -58,11 +57,12 @@ times (P a) (P b) = sumPolyList polyList
 instance Num a => Num (Poly a) where
     (+) = plus
     (*) = times
-    negate      = undefined
+    negate (P a) = P $ map negate a
     fromInteger = undefined
     -- No meaningful definitions exist
     abs    = undefined
     signum = undefined
+
 
 -- Exercise 7 -----------------------------------------
 
