@@ -78,5 +78,5 @@ class Num a => Differentiable a where
 
 -- Exercise 9 -----------------------------------------
 
-instance Num a => Differentiable (Poly a) where
-    deriv = undefined
+instance (Num a, Enum a) => Differentiable (Poly a) where
+    deriv (P z) = P . reverse . init . reverse $ map (\(i,v) -> i * v) $ zip [0..] z
