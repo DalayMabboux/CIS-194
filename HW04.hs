@@ -12,9 +12,9 @@ x = P [1]
 
 -- Exercise 2 ----------------------------------------
 
--- instance (Num a, Eq a) => Eq (Poly a) where
---     (P a) == (P b) = r a == r b
---        where r z = dropWhile (==0) z
+instance (Num a, Eq a) => Eq (Poly a) where
+     (P a) == (P b) = r a == r b
+        where r = dropWhile (==0)
 
 -- Exercise 3 -----------------------------------------
 -- instance (Num a, Eq a, Show a) => Show (Poly a) where
@@ -79,4 +79,4 @@ class Num a => Differentiable a where
 -- Exercise 9 -----------------------------------------
 
 instance (Num a, Enum a) => Differentiable (Poly a) where
-    deriv (P z) = P . tail $ map (\(i,v) -> i * v) $ zip [0..] z
+    deriv (P z) = P . tail $ zipWith (*) [0..] z
