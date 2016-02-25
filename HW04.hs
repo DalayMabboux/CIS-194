@@ -58,7 +58,7 @@ instance Num a => Num (Poly a) where
     (+) = plus
     (*) = times
     negate (P a) = P $ map negate a
-    fromInteger = undefined
+    fromInteger b = P [fromInteger b]
     -- No meaningful definitions exist
     abs    = undefined
     signum = undefined
@@ -67,14 +67,14 @@ instance Num a => Num (Poly a) where
 -- Exercise 7 -----------------------------------------
 
 applyP :: Num a => Poly a -> a -> a
-applyP = undefined
+applyP (P b) z = sum $ map (\(i,v) -> v * (z^i)) $ zip [0..] b
 
 -- Exercise 8 -----------------------------------------
 
 class Num a => Differentiable a where
     deriv  :: a -> a
     nderiv :: Int -> a -> a
-    nderiv = undefined
+    nderiv n b = iterate deriv b !! n
 
 -- Exercise 9 -----------------------------------------
 
