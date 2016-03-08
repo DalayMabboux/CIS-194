@@ -30,7 +30,7 @@ filterSecret f1 f2 = BS.concat $ map BS.singleton filteredWord8
 -- of the given encoded ByteString length
 getSecretByteString :: ByteString -> ByteString -> ByteString
 getSecretByteString secret encoded = BS.concat $ replicate c secret
-                                        where c = 1 + (fromIntegral $ BS.length encoded `div` BS.length secret)
+                                        where c = 1 + fromIntegral (BS.length encoded `div` BS.length secret)
 
 -- Get the secret as ByteString and the encoded file as ByteString, XOR them and return the result as ByteString
 xorSecret :: ByteString -> ByteString -> ByteString
