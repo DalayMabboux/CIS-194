@@ -6,6 +6,8 @@ import Data.ByteString.Lazy (ByteString)
 import Data.Map.Strict (Map)
 import System.Environment (getArgs)
 import Data.Bits (xor)
+import Data.Maybe (fromJust)
+import Data.List
 
 import qualified Data.ByteString.Lazy as BS
 import qualified Data.Map.Strict as Map
@@ -39,38 +41,63 @@ xorSecret s ebs = BS.pack $ BS.zipWith xor ebs (getSecretByteString s ebs)
 -- Provide the secret as ByteString and the path to the encryped file. When the action runs, it creates a file (fp) with the suffix "enc"
 decryptWithKey :: ByteString -> FilePath -> IO ()
 decryptWithKey s fp = do
-                  esb <- BS.readFile $ fp ++ ".enc"
-                  BS.writeFile fp $ xorSecret s esb
+                        esb <- BS.readFile $ fp ++ ".enc"
+                        BS.writeFile fp $ xorSecret s esb
 
 -- Exercise 3 -----------------------------------------
 
 parseFile :: FromJSON a => FilePath -> IO (Maybe a)
-parseFile = undefined
+parseFile fp = do
+                  bs <- BS.readFile fp
+                  return (decode bs)
 
 -- Exercise 4 -----------------------------------------
+filterBadTransaction :: Maybe [TId] -> Maybe [Transaction] -> Maybe [Transaction]
+filterBadTransaction (Just tids) (Just ts) = Just (filter (\t -> tid t `elem` tids) ts)
+filterBadTransaction _ _ = Nothing
 
 getBadTs :: FilePath -> FilePath -> IO (Maybe [Transaction])
-getBadTs = undefined
+getBadTs vfp tvp = do
+  vj <- parseFile vfp
+  tj <- parseFile tvp
+  return $ filterBadTransaction vj tj
 
 -- Exercise 5 -----------------------------------------
+-- Update the map for the given Transaction: add the amount to the 'to' person and remove it from the 'from' person
+updateMap :: Transaction -> Map String Integer -> Map String Integer
+updateMap t m = Map.insertWith (+) (to t) (amount t) $ Map.insertWith (+) (from t) (- amount t) m
 
 getFlow :: [Transaction] -> Map String Integer
-getFlow = undefined
+getFlow = foldr updateMap Map.empty
 
 -- Exercise 6 -----------------------------------------
 
 getCriminal :: Map String Integer -> String
-getCriminal = undefined
+getCriminal m = snd $ Map.foldlWithKey (\(a,o) k n -> if n > a then (n,k) else (a,o)) (0,"") m
 
 -- Exercise 7 -----------------------------------------
+prc :: [(String, Integer)] -> [(String, Integer)] -> [TId] -> [Transaction] -> [Transaction]
+prc [] _ _ ts = ts
+prc _ [] _ ts = ts
+prc w@(w1:ws) l@(l1:ls) tids ts
+        | snd w1 == 0 = prc ws l tids ts -- if the payer has 0 left, remove it and continue
+        | snd l1 == 0 = prc w ls tids ts -- if the payee has 0 left, remove it and continue
+        | snd w1 + snd l1 > 0 = prc ((fst w1, snd w1 + snd l1) : ws) ls tids (t (- snd l1) : ts) -- if the amount from the payer is higher than the amount of the payee, substract the amount from payer and remove the payee from the list
+        | snd w1 + snd l1 == 0 = prc ws ls tids (t (- snd l1) : ts) -- if the amount of payer and payee are equal, remove both from the list
+        | otherwise = prc ws ((fst l1, snd l1 + snd w1) : ls) tids (t (snd w1) : ts) -- if the amount of the payee is higher then add the amount to the payee and remove the payer from the list
+        where t a = Transaction {from = fst w1, to = fst l1, tid = head tids, amount = a} -- create a Transaction with the given amount
 
 undoTs :: Map String Integer -> [TId] -> [Transaction]
-undoTs = undefined
+undoTs m tids = prc ws ls tids []
+        where ws = reverse . sortOn snd $ Map.toAscList payers
+              ls = sortOn snd $ Map.toAscList payees
+              payers = fst $ Map.partition (>=0) m
+              payees = snd $ Map.partition (>=0) m
 
 -- Exercise 8 -----------------------------------------
 
 writeJSON :: ToJSON a => FilePath -> a -> IO ()
-writeJSON = undefined
+writeJSON fp a = writeFile fp (show (encode a))
 
 -- Exercise 9 -----------------------------------------
 
