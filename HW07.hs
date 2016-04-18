@@ -9,7 +9,7 @@ import Control.Monad hiding (mapM, liftM)
 import Control.Monad.Random
 import Data.Functor
 import Data.Monoid
-import Data.Vector (Vector, cons, (!), (!?), (//))
+import Data.Vector (Vector, cons, snoc, (!), (!?), (//),head,tail)
 import System.Random
 
 import qualified Data.Vector as V
@@ -78,7 +78,17 @@ shuffle as = do
 -- Exercise 6 -----------------------------------------
 
 partitionAt :: Ord a => Vector a -> Int -> (Vector a, a, Vector a)
-partitionAt = undefined
+partitionAt as p = (bs, pivot, us)
+  where
+    (bs,us, _) = V.foldl move (V.fromList [], V.fromList [], False) as
+    move (bs',us',added) a
+      | a < pivot = (V.snoc bs' a, us', added)
+      | otherwise = (bs', fst (addToUpper us' a added), snd (addToUpper us' a added))
+    pivot = as ! p
+    addToUpper us' a added
+      | added && a == pivot = (V.snoc us' a, added)
+      | not added && a == pivot = (us', True)
+      | otherwise = (V.snoc us' a, added)
 
 -- Exercise 7 -----------------------------------------
 
@@ -89,12 +99,24 @@ quicksort (x:xs) = quicksort [ y | y <- xs, y < x ]
                    <> (x : quicksort [ y | y <- xs, y >= x ])
 
 qsort :: Ord a => Vector a -> Vector a
-qsort = undefined
+qsort vs
+  | V.null vs = V.empty
+  | otherwise = qsort [v | v <- rest, v < first] <> V.cons first (qsort [v | v <- rest, v >= first])
+  where first = V.head vs
+        rest = V.tail vs
 
 -- Exercise 8 -----------------------------------------
 
 qsortR :: Ord a => Vector a -> Rnd (Vector a)
-qsortR = undefined
+qsortR vs
+  | V.null vs = return V.empty
+  | otherwise = do
+  let lgt = V.length vs
+  pivot <- getRandomR (0, lgt - 1)
+  let (l,p,u) = partitionAt vs pivot
+  ql <- qsortR l
+  qu <- qsortR u
+  return $ ql <> V.cons p qu
 
 -- Exercise 9 -----------------------------------------
 
