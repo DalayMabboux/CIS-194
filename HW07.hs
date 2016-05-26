@@ -9,7 +9,7 @@ import Control.Monad hiding (mapM, liftM)
 import Control.Monad.Random
 import Data.Functor
 import Data.Monoid
-import Data.Vector (Vector, cons, snoc, (!), (!?), (//),head,tail)
+import Data.Vector (Vector, cons, snoc, (!), (!?), (//), head, tail)
 import System.Random
 
 import qualified Data.Vector as V
@@ -111,36 +111,58 @@ qsortR :: Ord a => Vector a -> Rnd (Vector a)
 qsortR vs
   | V.null vs = return V.empty
   | otherwise = do
-  let lgt = V.length vs
-  pivot <- getRandomR (0, lgt - 1)
-  let (l,p,u) = partitionAt vs pivot
-  ql <- qsortR l
-  qu <- qsortR u
-  return $ ql <> V.cons p qu
+      let lgt = V.length vs
+      pivot <- getRandomR (0, lgt - 1)
+      let (l,p,u) = partitionAt vs pivot
+      ql <- qsortR l
+      qu <- qsortR u
+      return $ ql <> V.cons p qu
 
 -- Exercise 9 -----------------------------------------
 
 -- Selection
 select :: Ord a => Int -> Vector a -> Rnd (Maybe a)
-select = undefined
+select i vs
+  | len == 0 || i >= len = return Nothing
+  | otherwise = do
+    g <- getRandomR (0, V.length vs - 1)
+    let (l,p,u) = partitionAt vs g
+    let ll = V.length l
+    if i == ll then
+      return (Just p)
+    else
+      if i < ll then
+        select i l
+      else
+        select (i - ll - 1) u
+    where
+      len = V.length vs
 
 -- Exercise 10 ----------------------------------------
 
 allCards :: Deck
-allCards = undefined
+allCards = [Card l s | s <- suits, l <- labels]
 
 newDeck :: Rnd Deck
-newDeck =  undefined
+newDeck =  shuffle allCards
 
 -- Exercise 11 ----------------------------------------
 
 nextCard :: Deck -> Maybe (Card, Deck)
-nextCard = undefined
+nextCard d
+  | V.null d = Nothing
+  | otherwise = Just (V.head d, V.tail d)
 
 -- Exercise 12 ----------------------------------------
 
 getCards :: Int -> Deck -> Maybe ([Card], Deck)
-getCards = undefined
+getCards n d
+  | n > V.length d = Nothing
+  | n == 0 || V.null d = Just ([], d)
+  | otherwise = do
+    t <- nextCard d
+    r <- getCards (n - 1) (snd t)
+    return (fst t : fst r, snd r)
 
 -- Exercise 13 ----------------------------------------
 
